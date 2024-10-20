@@ -1,219 +1,233 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
-#define _CRT_SECURE_NO_WARNINGS
+#include <conio.h>
+#include "Structures.h"
 
-enum EntityTypes {
-	living = 1,
-	monster = 2,
-	player = 3
-};
-
-struct LivingEntity {
-	double healthPoints;
-	double movementSpeed;
-};
-struct MonsterEntity {
-	LivingEntity entity;
-	double damage;
-};
-struct Item {
-	char *name;
-};
-struct WeaponItem {
-	Item item;
-	double damage;
-};
-struct Inventory {
-	Item *items;
-	int count;
-};
-struct PlayerEntity {
-	LivingEntity entity;
-	Inventory playerInventory;
-	WeaponItem equippedWeapon;
-};
-
-
-LivingEntity createInstance(double healthPoints, double movementSpeed) {
+static LivingEntity livingEntityCreateInstance(double* healthPoints, double movementSpeed) {
 	LivingEntity livingEntity;
 	livingEntity.healthPoints = healthPoints;
 	livingEntity.movementSpeed = movementSpeed;
 	return livingEntity;
 }
 
-LivingEntity livingEntityInput() {
-	double healthPoints;
+static LivingEntity livingEntityInput(EntityType type) {
+	double* healthPoints = (double*)malloc(sizeof(double));
 	double movementSpeed;
-	printf("Health points of living entity input: ");
+	printf("\nHealth points of %s entity input: ", entityTypes[(int)type]);
 	do {
-		scanf("%lf", &healthPoints);
-		if (healthPoints <= 0)
-			printf("\nHealth points of living entity can't be <= 0. Try again: ");
-	} while (healthPoints <= 0);
-	printf("\nMovement speed of living entity input: ");
+		while (getchar() != '\n');
+		scanf("%lf", healthPoints);
+		if (*healthPoints <= 0)
+			printf("\nHealth points of %s entity can't be <= 0. Try again: ", entityTypes[(int)type]);
+	} while (*healthPoints <= 0);
+	printf("\nMovement speed of %s entity input: ", entityTypes[(int)type]);
 	do {
 		scanf("%lf", &movementSpeed);
 		if (movementSpeed <= 0)
-			printf("\nMovement speed of living entity can't be <= 0. Try again: ");
+			printf("\nMovement speed of %s entity can't be <= 0. Try again: ", entityTypes[(int)type]);
 	} while (movementSpeed <= 0);
-	return createInstance(healthPoints, movementSpeed);
+	return livingEntityCreateInstance(healthPoints, movementSpeed);
 }
 
-void livingEntityOutput(LivingEntity livingEntity, EntityTypes type) {
-	char entityType[20];
-	switch (type) {
-	case (int)living:
-		strcpy(entityType, "Living entity");
-		break;
-	case (int)monster:
-		strcpy(entityType, "Monster entity");
-		break;
-	case (int)player:
-		strcpy(entityType, "Player entity");
-		break;
+static void livingEntityOutput(LivingEntity livingEntity, EntityType type) {
+	printf("\n\n%s health points = %g, movement speed = %g", entityTypes[(int)type], *livingEntity.healthPoints, livingEntity.movementSpeed);
+	if (*livingEntity.healthPoints == 0)
+		printf("\n%s is dead!", entityTypes[(int)type]);
+}
+
+static void livingEntityHurt(LivingEntity livingEntity, double damage) {
+	*livingEntity.healthPoints -= damage;
+}
+
+static int isDead(LivingEntity livingEntity) {
+	if (*livingEntity.healthPoints <= 0) {
+		*livingEntity.healthPoints = 0;
+		return 1;
 	}
-	printf("%s health points = %lf, movement speed = %lf", entityType, livingEntity.healthPoints);
-	if (livingEntity.healthPoints == 0)
-		printf("\n%s is dead!", entityType);
+	else return 0;
 }
 
-void livingEntityHurt(LivingEntity livingEntity, double damage) {
-	livingEntity.healthPoints -= damage;
-	if (livingEntity.healthPoints <= 0)
-		livingEntity.healthPoints = 0;
-}
-
-MonsterEntity createInstance(double healthPoints, double movementSpeed, double damage) {
+static MonsterEntity monsterEntityCreateInstance(double* healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element damageType, Element weakness) {
 	MonsterEntity monsterEntity;
-	monsterEntity.entity = createInstance(healthPoints, movementSpeed);
-	monsterEntity.damage = damage;
+	monsterEntity.entity = livingEntityCreateInstance(healthPoints, movementSpeed);
+	monsterEntity.baseDamage = baseDamage;
+	monsterEntity.elementDamage = elementDamage;
+	monsterEntity.damageType = damageType;
+	monsterEntity.weakness = weakness;
 	return monsterEntity;
 }
 
-MonsterEntity MonsterEntityInput() {
-	LivingEntity entity = livingEntityInput();
-	double damage;
-	printf("Damage of monster entity input: ");
+static MonsterEntity monsterEntityInput() {
+	LivingEntity entity = livingEntityInput(monster);
+	double baseDamage;
+	double elementDamage = 0;
+	int damageType;
+	int weakness;
+	printf("\nBase damage of monster entity input: ");
 	do {
-		scanf("%lf");
-		if (damage <= 0)
-			printf("\nDamage can't be <= 0. Try again: ");
-	} while (damage <= 0);
-	return createInstance(entity.healthPoints, entity.movementSpeed, damage);
+		scanf("%lf", &baseDamage);
+		if (baseDamage <= 0)
+			printf("\nBase damage can't be <= 0. Try again: ");
+	} while (baseDamage <= 0);
+	printf("Elemental type of damage of monster entity input (0 - none, 1 - fire, 2 - magic, 3 - lighting): ");
+	do {
+		scanf("%d", &damageType);
+		if (damageType < 0 || damageType > 3)
+			printf("\nDamage type must be between 0 and 3. Try again: ");
+	} while (damageType < 0 || damageType > 3);
+	
+	if (damageType != 0) {
+		printf("\nElemental damage of monster entity input: ");
+		do {
+			scanf("%lf", &elementDamage);
+			if (elementDamage < 0)
+				printf("\nElemental damage can't be < 0. Try again: ");
+		} while (elementDamage < 0);
+	}
+	
+	printf("Monster entity weakness to elemental type of damage input (0 - none, 1 - fire, 2 - magic, 3 - lighting): ");
+	do {
+		scanf("%d", &weakness);
+		if (weakness < 0 || weakness > 3)
+			printf("\nWeakness type must be between 0 and 3. Try again: ");
+	} while (weakness < 0 || weakness > 3);
+	return monsterEntityCreateInstance(entity.healthPoints, entity.movementSpeed, baseDamage, elementDamage, (Element)damageType, (Element)weakness);
 }
 
-void monsterEntityHurt(MonsterEntity monster, double damage) {
+static void monsterEntityHurt(MonsterEntity monster, double baseDamage, double elementDamage, Element damageType) {
+	double damage = baseDamage;
+	if (monster.weakness == damageType)
+		damage += elementDamage;
+	else if (monster.weakness != none)
+		damage += elementDamage * 0.5;
 	livingEntityHurt(monster.entity, damage);
 }
 
-void monsterEntityAttack(MonsterEntity monster, PlayerEntity player) {
-	playerEntityHurt(player, monster.damage);
+static void monsterEntityAttack(MonsterEntity monster, PlayerEntity player) {
+	if (!isDead(monster.entity)) {
+		double damage = monster.baseDamage * (1 - player.equippedArmor.baseDefence / 100);
+		double elementDamage = 0;
+		if (player.equippedArmor.defenceType == monster.damageType && monster.damageType != none)
+			elementDamage = monster.elementDamage * (1 - player.equippedArmor.elementDefence / 100);
+		else if (monster.damageType != none) elementDamage = monster.elementDamage;
+		damage += elementDamage;
+		playerEntityHurt(player, damage);
+	}
 }
-
-void monsterEntityOutput(MonsterEntity monsterEntity) {
-	printf("Monster entity damage = %lf\n", monsterEntity.damage);
+static void monsterEntityOutput(MonsterEntity monsterEntity) {
+	printf("Monster entity base damage = %g\nMonster entity elemental damage = %g\nMonster entity damage type: %s\nMonster entity weakness: %s", monsterEntity.baseDamage, monsterEntity.elementDamage, elementNames[monsterEntity.damageType], elementNames[monsterEntity.weakness]);
 	livingEntityOutput(monsterEntity.entity, monster);
 }
 
-Item createInstance(char* name) {
-	Item item;
-	item.name = name;
-	return item;
+static Armor armorCreateInstance(double baseDefence, double elementDefence, Element defenceType) {
+	Armor armor;
+	armor.baseDefence = baseDefence;
+	armor.elementDefence = elementDefence;
+	armor.defenceType = defenceType;
+	return armor;
 }
 
-Item itemInput() {
-	char* name = (char*)calloc(30, sizeof(char));
-	printf("Item name input: ");
+static Armor armorInput() {
+	double baseDefence;
+	double elementDefence = 0;
+	Element defenceType;
+	printf("\nBase defence of armor input (in %%): ");
 	do {
-		fgets(name, 30, stdin);
-		if (strlen(name) == 0)
-			printf("\nTry again: ");
-	} while (strlen(name) == 0);
-	return createInstance(name);
+		scanf("%lf", &baseDefence);
+		if (baseDefence < 0 || baseDefence > 100)
+			printf("\nBase defence must be between 0 and 100. Try again: ");
+	} while (baseDefence < 0 || baseDefence > 100);
+	printf("Elemental type of armor defence input (0 - none, 1 - fire, 2 - magic, 3 - lighting): ");
+	do {
+		scanf("%d", &defenceType);
+		if (defenceType < 0 || defenceType > 3)
+			printf("\nDefence type must be between 0 and 3. Try again: ");
+	} while (defenceType < 0 || defenceType > 3);
+	if (defenceType != 0) {
+		printf("\nElemental defence of armor input (in %%): ");
+		do {
+			scanf("%lf", &elementDefence);
+			if (elementDefence < 0 || elementDefence > 100)
+				printf("\nElemental defence must be between 0 and 100. Try again: ");
+		} while (elementDefence < 0 || elementDefence > 100);
+	}
+	return armorCreateInstance(baseDefence, elementDefence, defenceType);
 }
 
-void itemOutput(Item item) {
-	printf("Item name: %s\n", item.name);
+static void armorOutput(Armor armor) {
+	printf("\nBase armor defence = %g%%\nElemental armor defence = %g%%\nArmor defence type: %s", armor.baseDefence, armor.elementDefence, elementNames[armor.defenceType]);
 }
 
-WeaponItem createInstance(char* name, double damage) {
-	WeaponItem weapon;
-	weapon.item = createInstance(name);
-	weapon.damage = damage;
+static Weapon weaponCreateInstance(double baseDamage, double elementDamage, Element damageType) {
+	Weapon weapon;
+	weapon.baseDamage = baseDamage;
+	weapon.elementDamage = elementDamage;
+	weapon.damageType = damageType;
 	return weapon;
 }
 
-WeaponItem weaponInput() {
-	Item weapon = itemInput();
-	double damage;
-	printf("Damage of weapon input: ");
+static Weapon weaponInput() {
+	double baseDamage;
+	double elementDamage = 0;
+	Element damageType;
+	printf("\nBase weapon damage input: ");
 	do {
-		scanf("%lf", &damage);
-		if (damage <= 0)
+		scanf("%lf", &baseDamage);
+		if (baseDamage <= 0)
 			printf("\nDamage can't be <= 0. Try again: ");
-	} while (damage <= 0);
-	return createInstance(weapon.name, damage);
-}
-
-void weaponItemOutput(WeaponItem weapon) {
-	itemOutput(weapon.item);
-	printf("\nDamage of weapon = %lf", weapon.damage);
-}
-
-Inventory createInstance(Item *items, int count) {
-	Inventory inventory;
-	inventory.items = items;
-	inventory.count = count;
-	return inventory;
-}
-
-Inventory inventoryInput() {
-	int count;
-	printf("Count of inventory items input: ");
+	} while (baseDamage <= 0);
+	printf("Elemental type of weapon damage input (0 - none, 1 - fire, 2 - magic, 3 - lighting): ");
 	do {
-		scanf("%d", &count);
-		if (count <= 0 || count > 20)
-			printf("\nCount of inventory items must be between 1 and 20");
-	} while (count <= 0 || count > 20);
-	Item* items = (Item*) calloc(count, sizeof(Item));
-	printf("Names of %d items input: ", count);
-	for (int i = 0; i < count; i++)
-		items[i] = itemInput();
-	return createInstance(items, count);
+		scanf("%d", &damageType);
+		if (damageType < 0 || damageType > 3)
+			printf("\nDamage type must be between 0 and 3. Try again: ");
+	} while (damageType < 0 || damageType > 3);
+	if (damageType != 0) {
+		printf("\nElemental weapon damage input: ");
+		do {
+			scanf("%lf", &elementDamage);
+			if (elementDamage < 0)
+				printf("\nElemental damage can't be < 0. Try again: ");
+		} while (elementDamage < 0);
+	}
+	return weaponCreateInstance(baseDamage, elementDamage, damageType);
 }
 
-void inventoryOutput(Inventory inventory) {
-	for (int i = 0; i < inventory.count; i++)
-		itemOutput(inventory.items[i]);
+static void weaponOutput(Weapon weapon) {
+	printf("\nBase damage of weapon = %g\nElemental damage of weapon = %g\nDamage type of weapon: %s", weapon.baseDamage, weapon.elementDamage, elementNames[weapon.damageType]);
 }
 
-PlayerEntity createInstance(double healthPoints, double movementSpeed, Inventory playerInventory, WeaponItem equippedWeapon) {
+static PlayerEntity playerEntityCreateInstance(double* healthPoints, double movementSpeed, Weapon equippedWeapon, Armor equippedArmor) {
 	PlayerEntity player;
-	player.entity = createInstance(healthPoints, movementSpeed);
-	player.playerInventory = playerInventory;
+	player.entity = livingEntityCreateInstance(healthPoints, movementSpeed);
 	player.equippedWeapon = equippedWeapon;
+	player.equippedArmor = equippedArmor;
 	return player;
 }
 
-PlayerEntity playerEntityInput() {
-	LivingEntity player = livingEntityInput();
-	Inventory playerInventory = inventoryInput();
-	WeaponItem equippedWeapon = weaponInput();
+static PlayerEntity playerEntityInput() {
+	LivingEntity playerEntity = livingEntityInput(player);
+	Weapon equippedWeapon = weaponInput();
+	Armor equippedArmor = armorInput();
+	return playerEntityCreateInstance(playerEntity.healthPoints, playerEntity.movementSpeed, equippedWeapon, equippedArmor);
 }
 
-void playerEntityOutput(PlayerEntity entity) {
-	printf("Player inventory:\n");
-	inventoryOutput(entity.playerInventory);
-	printf("Player weapon:\n");
-	weaponItemOutput(entity.equippedWeapon);
+static void playerEntityOutput(PlayerEntity entity) {
+	printf("\nPlayer armor:\n");
+	armorOutput(entity.equippedArmor);
+	printf("\n\nPlayer weapon:\n");
+	weaponOutput(entity.equippedWeapon);
 	livingEntityOutput(entity.entity, player);
 }
 
-void playerEntityHurt(PlayerEntity player, double damage) {
+static void playerEntityHurt(PlayerEntity player, double damage) {
 	livingEntityHurt(player.entity, damage);
 }
 
-void playerEntityAttack(PlayerEntity player, MonsterEntity monster) {
-	monsterEntityHurt(monster, player.equippedWeapon.damage);
+static void playerEntityAttack(PlayerEntity player, MonsterEntity monster) {
+	if (!isDead(player.entity))
+		monsterEntityHurt(monster, player.equippedWeapon.baseDamage, player.equippedWeapon.elementDamage, player.equippedWeapon.damageType);
 }
