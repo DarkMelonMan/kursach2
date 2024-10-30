@@ -37,8 +37,9 @@ static const char* entityTypes[] = {
 /// и статическое поле скорости передвижения
 /// </summary>
 
-struct LivingEntity {
-	double* healthPoints;
+struct LivingEntityStruct {
+	char* name = NULL;
+	double* healthPoints = NULL;
 	double movementSpeed;
 };
 
@@ -47,8 +48,8 @@ struct LivingEntity {
 /// стихийного урона, уязвимости к определённой стихии и типа элементального урона.
 /// </summary>
 
-struct MonsterEntity {
-	LivingEntity entity;
+struct MonsterEntityStruct {
+	LivingEntityStruct entity;
 	double baseDamage;
 	double elementDamage;
 	Element weakness;
@@ -61,7 +62,7 @@ struct MonsterEntity {
 /// </summary>
 
 
-struct Armor {
+struct ArmorStruct {
 	double baseDefence;
 	double elementDefence;
 	Element defenceType;
@@ -72,7 +73,7 @@ struct Armor {
 /// и типа стихийного урона
 /// </summary>
 
-struct Weapon {
+struct WeaponStruct {
 	Element damageType;
 	double baseDamage;
 	double elementDamage;
@@ -82,134 +83,134 @@ struct Weapon {
 /// Структура игрока, содержащая поля: живой сущности, брони и оружия
 /// </summary>
 
-struct PlayerEntity {
-	LivingEntity entity;
-	Armor equippedArmor;
-	Weapon equippedWeapon;
+struct PlayerEntityStruct {
+	LivingEntityStruct entity;
+	ArmorStruct equippedArmor;
+	WeaponStruct equippedWeapon;
 };
 
 /// <summary>
 /// Функция создания новой живой сущности
 /// </summary>
 
-static LivingEntity livingEntityCreateInstance(double* healthPoints, double movementSpeed);
+static LivingEntityStruct livingEntityCreateInstance(char* name, double* healthPoints, double movementSpeed);
 
 /// <summary>
 /// Функция ввода полей живой сущности
 /// </summary>
 
-static LivingEntity livingEntityInput(EntityType type);
+static LivingEntityStruct livingEntityInput(EntityType type);
 
 /// <summary>
 /// Функция вывода полей живой сущности
 /// </summary>
 
-static void livingEntityOutput(LivingEntity livingEntity, EntityType type);
+static void livingEntityOutput(LivingEntityStruct livingEntity);
 
 /// <summary>
 /// Функция получения урона живой сущностью
 /// </summary>
 
-static void livingEntityHurt(LivingEntity livingEntity, double damage);
+static void livingEntityHurt(LivingEntityStruct livingEntity, double damage);
 
 /// <summary>
 /// Функция проверки сущности, жива ли она
 /// </summary>
 
-static int isDead(LivingEntity livingEntity);
+static int isDead(LivingEntityStruct livingEntity);
 
 /// <summary>
 /// Функция создания нового монстра
 /// </summary>
 
-static MonsterEntity monsterEntityCreateInstance(double* healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element damageType, Element weakness);
+static MonsterEntityStruct monsterEntityCreateInstance(char* name, double* healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element damageType, Element weakness);
 
 /// <summary>
 /// Функция ввода полей монстра
 /// </summary>
 
-static MonsterEntity monsterEntityInput();
+static MonsterEntityStruct monsterEntityInput();
 
 /// <summary>
 /// Функция получения урона монстром
 /// </summary>
 
-static void monsterEntityHurt(MonsterEntity monster, double baseDamage, double elementDamage, Element damageType);
+static void monsterEntityHurt(MonsterEntityStruct monster, double baseDamage, double elementDamage, Element damageType);
 
 /// <summary>
 /// Функция атаки монстром игрока
 /// </summary>
 
-static void monsterEntityAttack(MonsterEntity monster, PlayerEntity player);
+static void monsterEntityAttack(MonsterEntityStruct monster, PlayerEntityStruct player);
 
 /// <summary>
 /// Функция вывода полей монстра
 /// </summary>
 
-static void monsterEntityOutput(MonsterEntity monsterEntity);
+static void monsterEntityOutput(MonsterEntityStruct monsterEntity);
 
 /// <summary>
 /// Функция создания новой брони
 /// </summary>
 
-static Armor armorCreateInstance(double baseDefence, double elementDefence, Element defenceType);
+static ArmorStruct armorCreateInstance(double baseDefence, double elementDefence, Element defenceType);
 
 /// <summary>
 /// Функция ввода полей брони
 /// </summary>
 
-static Armor armorInput();
+static ArmorStruct armorInput();
 
 /// <summary>
 /// Функция вывода полей брони
 /// </summary>
 
-static void armorOutput(Armor armor);
+static void armorOutput(ArmorStruct armor);
 
 /// <summary>
 /// Функция создания нового оружия
 /// </summary>
 
-static Weapon weaponCreateInstance(double baseDamage, double elementDamage, Element damageType);
+static WeaponStruct weaponCreateInstance(double baseDamage, double elementDamage, Element damageType);
 
 /// <summary>
 /// Функция ввода полей оружия
 /// </summary>
 
-static Weapon weaponInput();
+static WeaponStruct weaponInput();
 
 /// <summary>
 /// Функция вывода полей оружия
 /// </summary>
 
-static void weaponOutput(Weapon weapon);
+static void weaponOutput(WeaponStruct weapon);
 
 /// <summary>
 /// Функция создания нового игрока
 /// </summary>
 
-static PlayerEntity playerEntityCreateInstance(double* healthPoints, double movementSpeed, Weapon equippedWeapon, Armor equippedArmor);
+static PlayerEntityStruct playerEntityCreateInstance(char* name, double* healthPoints, double movementSpeed, WeaponStruct equippedWeapon, ArmorStruct equippedArmor);
 
 /// <summary>
 /// Функция ввода полей игрока
 /// </summary>
 
-static PlayerEntity playerEntityInput();
+static PlayerEntityStruct playerEntityInput();
 
 /// <summary>
 /// Функция вывода полей игрока
 /// </summary>
 
-static void playerEntityOutput(PlayerEntity entity);
+static void playerEntityOutput(PlayerEntityStruct entity);
 
 /// <summary>
 /// Функция получения урона игроком
 /// </summary>
 
-static void playerEntityHurt(PlayerEntity player, double damage);
+static void playerEntityHurt(PlayerEntityStruct player, double damage);
 
 /// <summary>
 /// Функция атаки игроком монстра
 /// </summary>
 
-static void playerEntityAttack(PlayerEntity player, MonsterEntity monster);
+static void playerEntityAttack(PlayerEntityStruct player, MonsterEntityStruct monster);
