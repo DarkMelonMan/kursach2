@@ -1,157 +1,187 @@
 #pragma once
 #include <iostream>
+#include "Util.h"
 using namespace std;
 
+/// <summary>
+/// Класс живых существ, надкласс для классов монстров и игроков
+/// </summary>
 class LivingEntity {
 protected:
 	string name;
 	double healthPoints;
 	double movementSpeed;
-	void hurt(double damage) {
-		healthPoints -= damage;
-		if (healthPoints < 0)
-			healthPoints = 0;
-		cout << endl << name << " entity is dead. Calling destructor";
-		delete this;
-	}
-	void inputFields() {
-		cout << "Enter a name for a new living entity: ";
-		do {
-			cin >> name;
-			if (name.empty())
-				cout << endl << "Invalid name. Try again: ";
-		} while (name.empty());
-		cout << endl << "Enter health points of " << name << " entity: ";
-		do {
-			cin >> healthPoints;
-			if (healthPoints <= 0)
-				cout << endl << "Invalid health points. Try again: ";
-		} while (healthPoints <= 0);
-		cout << endl << "Enter movement speed of " << name << " entity: ";
-		do {
-			cin >> movementSpeed;
-			if (movementSpeed <= 0)
-				cout << endl << "Invalid movement speed. Try again: ";
-		} while (movementSpeed <= 0);
-		cout << endl << name << " entity created!";
-	}
+
+	/// <summary>
+	/// Получить урон
+	/// </summary>
+	/// <param name="damage">Получаемый игроком урон</param>
+	void hurt(double damage);
+	
+	/// <summary>
+	/// Ввод всех полей
+	/// </summary>
+	void inputLivingEntityFields();
+
 public:
-	LivingEntity(string name, double healthPoints, double movementSpeed) {
-		this->name = name;
-		this->healthPoints = healthPoints;
-		this->movementSpeed = movementSpeed;
-	}
-	LivingEntity() {
-		inputFields();
-	}
+	
+	LivingEntity(string name, double healthPoints, double movementSpeed);
+	LivingEntity();
 	~LivingEntity() {};
-	void PrintOnScreen() {
-		cout << endl << endl << name << " - living entity:";
-		cout << endl << "Health points: " << healthPoints;
-		cout << endl << "Movement speed: " << movementSpeed;
-	}
+	/// <summary>
+	/// Вывод на экран всех полей
+	/// </summary>
+	void Print();
 };
 
-class MonsterEntity: LivingEntity {
+class Armor {
+private:
+	double baseDefence;
+	double elementDefence;
+	Element defenceType;
+	/// <summary>
+	/// Ввод всех полей
+	/// </summary>
+	void inputArmorFields();
+public:
+	
+	/// <summary>
+	/// Получить значение базовой защиты
+	/// </summary>
+	/// <returns>Базовая защита брони</returns>
+	double getBaseDefence();
+	
+	/// <summary>
+	/// Получить значение стихийной защиты
+	/// </summary>
+	/// <returns>Стихийная защита брони</returns>
+	double getElementDefence();
+	
+	/// <summary>
+	/// Получить тип стихийной защиты
+	/// </summary>
+	/// <returns>Тип стихийной защиты</returns>
+	double getDefenceType();
+	Armor();
+	Armor(double baseDefence, double elementDefence, Element defenceType);
+	
+	/// <summary>
+	/// Вывод на экран всех полей
+	/// </summary>
+	void Print();
+};
+class Weapon {
+private:
+	Element damageType;
+	double baseDamage;
+	double elementDamage;
+	
+	/// <summary>
+	/// Ввод всех полей
+	/// </summary>
+	void inputWeaponFields();
+public:
+	Weapon(double baseDamage, double elementDamage, Element damageType);
+	Weapon();
+
+	/// <summary>
+	/// Получить базовый урон
+	/// </summary>
+	/// <returns>Базовый урон оружия</returns>
+	double getBaseDamage();
+
+	/// <summary>
+	/// Получить стихийный урон
+	/// </summary>
+	/// <returns>Стихийный урон орежия</returns>
+	double getElementDamage();
+
+	/// <summary>
+	/// Получить тип стихийного урона
+	/// </summary>
+	/// <returns>Тип стихийного урона оружия</returns>
+	Element getDamageType();
+	
+	/// <summary>
+	/// Вывод всех полей
+	/// </summary>
+	void Print();
+};
+
+class MonsterEntity;
+
+class PlayerEntity : public LivingEntity {
+private:
+	Armor* armor;
+	Weapon* weapon;
+
+	/// <summary>
+	/// Ввод всех полей
+	/// </summary>
+	void inputPlayerEntityFields();
+public:
+	PlayerEntity(string name, double healthPoints, double movementSpeed, Armor* armor, Weapon* weapon);
+	PlayerEntity();
+
+	/// <summary>
+	/// Получить объект брони игрока
+	/// </summary>
+	/// <returns>Обхект брони игрока</returns>
+	Armor* getArmor();
+	
+	/// <summary>
+	/// Получить объект оружия игрока
+	/// </summary>
+	/// <returns>Объект оружия игрока</returns>
+	Weapon* getWeapon();
+
+	/// <summary>
+	/// Получить урон
+	/// </summary>
+	/// <param name="baseDamage">Базовый урон</param>
+	/// <param name="elementDamage">Стихийный урон</param>
+	/// <param name="damageType">Тип стихийного урона</param>
+	void Hurt(double baseDamage, double elementDamage, Element damageType);
+	
+	/// <summary>
+	/// Атаковать монстра
+	/// </summary>
+	/// <param name="monster">Указатель на объект монстра</param>
+	void AttackMonster(MonsterEntity* monster);
+	
+	/// <summary>
+	/// Вывод на экран всех полей
+	/// </summary>
+	void Print();
+};
+
+class MonsterEntity : public LivingEntity {
 private:
 	double baseDamage;
 	double elementDamage;
 	Element weakness;
 	Element damageType;
+	
+	/// <summary>
+	/// Ввод всех полей
+	/// </summary>
+	void inputMonsterEntityFields();
 public:
-	MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType) {
-		this->name = name;
-		this->healthPoints = healthPoints;
-		this->movementSpeed = movementSpeed;
-		this->baseDamage = baseDamage;
-		this->elementDamage = elementDamage;
-		this->weakness = weakness;
-		this->damageType = damageType;
-	}
-	MonsterEntity() {
-		inputFields();
-		int weakness;
-		int damageType;
-		cout << endl << "Enter base damage of " << name << " monster entity: ";
-		do {
-			cin >> baseDamage;
-			if (baseDamage <= 0)
-				cout << endl << "Invalid base damage. Try again: ";
-		} while (baseDamage <= 0);
-		cout << endl << "Enter elemental weakness of " << name << " monster entity (0 - none, 1 - fire, 2 - magic, 3 - lighting): ";
-		do {
-			cin >> weakness;
-			if (weakness < 0 || weakness > 3)
-				cout << endl << "Invalid weakness type. Try again: ";
-		} while (weakness < 0 || weakness > 3);
-		this->weakness = (Element)weakness;
-		cout << endl << "Enter elemental type of damage of " << name << " monster entity (0 - none, 1 - fire, 2 - magic, 3 - lighting): ";
-		do {
-			cin >> damageType;
-			if (damageType < 0 || damageType > 3)
-				cout << endl << "Invalid type of damage. Try again: ";
-		} while (damageType < 0 || damageType > 3);
-		this->damageType = (Element)damageType;
-		if (this->damageType != none) {
-			cout << endl << "Enter elemental damage of " << name << " monster entity: ";
-			do {
-				cin >> elementDamage;
-				if (elementDamage <= 0)
-					cout << endl << "Invalid elemental damage. Try again: ";
-			} while (elementDamage <= 0);
-		}
-		else elementDamage = 0;
-		cout << endl << name << " monster entity created!";
-	}
-	void hurt(double baseDamage, double elementDamage, Element damageType) {
-		double damage = baseDamage;
-		if (this->weakness == damageType && this -> weakness != none)
-			damage += elementDamage;
-		else if (this->weakness != none)
-			damage += elementDamage * 0.5;
-		LivingEntity::hurt(damage);
-	}
-	void AttackPlayer(PlayerEntity* player) {
-		double damage = this->baseDamage * (1 - player->getArmor()->getBaseDefence() / 100);
-		double elementDamage = 0;
-		/*if (player.equippedArmor.defenceType == monster.damageType && monster.damageType != none)
-			elementDamage = monster.elementDamage * (1 - player.equippedArmor.elementDefence / 100);
-		else if (monster.damageType != none) elementDamage = monster.elementDamage;
-		damage += elementDamage;
-		playerEntityHurt(player, damage);*/
-	}
+	MonsterEntity(string name, double healthPoints, double movementSpeed, double baseDamage, double elementDamage, Element weakness, Element damageType);
+	MonsterEntity();
 
-};
-class PlayerEntity : LivingEntity {
-private:
-	Armor* armor;
-	Weapon* weapon;
-public:
-	PlayerEntity(string name, double healthPoints, double movementSpeed, Armor* armor, Weapon* weapon) {
-		this->name = name;
-		this->healthPoints = healthPoints;
-		this->movementSpeed = movementSpeed;
-		this->armor = armor;
-		this->weapon = weapon;
-	}
-	PlayerEntity() {
-		inputFields();
-		
-		cout << endl << name << " player entity created!";
-	}
-	Armor* getArmor() {
-		return this->armor;
-	}
-};
-class Armor {
-private:
-	double baseDefence;
-
-public:
-	double getBaseDefence() {
-		return this->baseDefence;
-	}
-};
-class Weapon {
-
+	/// <summary>
+	/// Получить урон
+	/// </summary>
+	/// <param name="baseDamage">Базовый урон</param>
+	/// <param name="elementDamage">Стихийный урон</param>
+	/// <param name="damageType">Тип стихийного урона</param>
+	void Hurt(double baseDamage, double elementDamage, Element damageType);
+	
+	/// <summary>
+	/// Атаковать игрока
+	/// </summary>
+	/// <param name="player">Указатель на объект игрока</param>
+	void AttackPlayer(PlayerEntity* player);
+	void Print();
 };
