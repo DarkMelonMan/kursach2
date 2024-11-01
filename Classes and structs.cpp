@@ -1,4 +1,3 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
 #include "Structures.cpp"
 #include "Classes.h"
 
@@ -11,8 +10,8 @@ void chooseStruct() {
 			if (choice < 1 || choice > 3)
 				printf("Wrong choice. Try again: ");
 		} while (choice < 1 || choice > 3);
-		MonsterEntity monsterEntity;
-		PlayerEntity player;
+		MonsterEntityStruct monsterEntity;
+		PlayerEntityStruct player;
 		if (choice != 3) {
 			monsterEntity = monsterEntityInput();
 			player = playerEntityInput();
@@ -43,22 +42,41 @@ void chooseStruct() {
 void chooseClass() {
 	int choice;
 	do {
-		printf("\nChoose struct type:\n1)MonsterEntity\n2)PlayerEntity\n3)Exit\n");
+		printf("\nChoose class type:\n1)MonsterEntity\n2)PlayerEntity\n3)Exit\n");
 		do {
 			scanf("%d", &choice);
 			if (choice < 1 || choice > 3)
 				printf("Wrong choice. Try again: ");
 		} while (choice < 1 || choice > 3);
-		LivingEntity* entity = new LivingEntity();		
+		if (choice == 3)
+			exit(0);
+		cout << endl << "Create a new monster entity:" << endl;
+		MonsterEntity* monsterEntity = new MonsterEntity();
+		cout << endl << "Create a new player entity:" << endl;
+		PlayerEntity* playerEntity = new PlayerEntity();
+		LivingEntity* entities[] = { monsterEntity, playerEntity };
 		switch (choice) {
 		case 1:
-			entity->PrintOnScreen();
+			((MonsterEntity*)entities[0])->Print();
+			cout << endl << "Before Attack" << endl;
+			((PlayerEntity*)entities[1])->Print();
+			((MonsterEntity*)entities[0])->AttackPlayer(((PlayerEntity*)entities[1]));
+			cout << endl << "After Attack" << endl;
+			((PlayerEntity*)entities[1])->Print();
 			break;
 		case 2:
+			((PlayerEntity*)entities[1])->Print();
+			cout << endl << "Before Attack" << endl;
+			monsterEntity->Print();
+			((PlayerEntity*)entities[1])->AttackMonster(monsterEntity);
+			cout << endl << "After Attack" << endl;
+			((MonsterEntity*)entities[0])->Print();
 			break;
 		default:
 			break;
 		}
+		for (int i = 0; i < 2; i++)
+			delete entities[i];
 	} while (choice != 3);
 }
 
@@ -84,5 +102,5 @@ int main()
 		}
 	} while (testChoice != 3);
 
-	
+
 }
